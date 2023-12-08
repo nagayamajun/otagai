@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id               String     @id @unique
+  name             String
+  selfIntroduction String
+  githubAccount    String
+  imageUrl         String?
+  products         Product[]
+  feedbacks        Feedback[]
+}
+
+model Product {
+  id                   String             @id @default(cuid())
+  name                 String
+  overview             String
+  techConsideration    String
+  serviceConsideration String
+  documentationUrl     String
+  techStacks           TechStack[]
+  githubRepositories   GithubRepository[]
+  feedback             Feedback[]
+
+  implementor User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@index([userId])
+}
+
+model TechStack {
+  id              String @id @default(cuid())
+  tech            String
+  selectionReason String
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  @@index([productId])
+}
+
+model GithubRepository {
+  id   String @id @default(cuid())
+  name String
+  url  String
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  @@index([productId])
+}
+
+model Feedback {
+  id                String @id @default(cuid())
+  ratingPoint       Int
+  goodReview        String
+  improvementReview String
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  reviewer User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+
+  @@index([productId])
+  @@index([userId])
+}
